@@ -33,9 +33,20 @@ $NODES | ForEach-Object {
 # This must be the last entry in the /etc/hosts
 echo "127.0.0.1 localhost" >> ./config/hosts #>
 
+### bootstrap
 $NODES | % {
-    Write-Output "docker exec $_ bash -c `"/bigtop-home/provisioner/utils/setup-env-$distro.sh $enable_local_repo`" -d"
+    docker exec $_ bash -c "/bigtop-home/provisioner/utils/setup-env-$distro.sh $enable_local_repo" -d
 }
+
+### provision
+## bigtop-puppet
+$NODES | % {
+    Write-Output "docker exec $_ bash -c `"puppet apply --parser future --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests`" -d"
+    docker exec $_ bash -c "puppet apply --parser future --modulepath=/bigtop-home/bigtop-deploy/puppet/modules:/etc/puppet/modules /bigtop-home/bigtop-deploy/puppet/manifests" -d
+}
+
+
+
 
 
 
